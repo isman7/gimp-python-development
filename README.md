@@ -1,11 +1,11 @@
 # gimp-python-development
-Some ideas and tools to develope Python 3.8 plugins for GIMP 2.99.4. GIMP 2.99.4 is the latest unstable pre-release of GIMP 3. It suppots Python 3,
+Some ideas and tools to develop Python 3.8 plugins for GIMP 2.99.4. GIMP 2.99.4 is the latest unstable pre-release of GIMP 3. It suppots Python 3,
 however it's documentation is rather poor, and also one thing that always annoyed me was it uses the system Python distribution and adds on top
-of it some libreries. Also, a GIMP plugin must run inside GIMP... So, let's hack to have a proper developing environment!
+of it some libraries. Also, a GIMP plugin must run inside GIMP... So, let's hack to have a proper developing environment!
 
 ## Install GIMP 2.99.4
 
-GIMP 2.99.4 cames with pre-compiled binaries in a flatpak distribution. So first of all if you don't have flatpak, assuming you are on a Debian-based
+GIMP 2.99.4 comes with pre-compiled binaries in a flatpak distribution. So, first of all if you don't have flatpak, assuming you are on a Debian-based
 Linux distro: 
 
 ```
@@ -13,7 +13,7 @@ $ sudo apt install flatpak
 ```
 
 Flatpak is a distribution system, like Apt, but focused on end-user applications and isolation. Like Docker, it isolates the compiled application
-in it's own Sandbox, however it is not actually virtualized. Let's install GIMP 2.99.4: 
+in its own Sandbox, however it is not actually virtualized. Let's install GIMP 2.99.4: 
 
 ```
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -28,9 +28,9 @@ flatpak run org.gimp.GIMP//beta
 
 ## Understanding which Python is using GIMP 
 
-So, in order to start developing we must understad which Python executable is using GIMP. This was tricky to me at first, but it actually has 
+So, in order to start developing we must understand which Python executable is using GIMP. This was tricky to me at first, but it actually has 
 a very nice outcome. As I mentioned, GIMP uses the system Python executable, if we go to the menu entry 
-`Filters > Development > Python-Fu > Python Console` a window will be promt with a Python console that will say: 
+`Filters > Development > Python-Fu > Python Console` a window will be prompt with a Python console that will say: 
 
 ```
 GIMP 2.99.4 Python Console
@@ -62,7 +62,7 @@ this is very good news. Because, we finally have an isolated Python environment 
 ## Prepare the environment
 
 As it is thought as a minimal environment, it lacks some basic tools for developing Python code, let's install some of them. First, things 
-firts, let's ensure pip is installed: 
+firsts, let's ensure pip is installed: 
 
 ```
 $ python -m ensurepip
@@ -92,7 +92,7 @@ IPython 7.20.0 -- An enhanced Interactive Python. Type '?' for help.
 In [1]: 
 ```
 
-However, it will chrash inmediadtely. This is because the plug-in messes up with `sys.stdout` and `sys.sterr` objects, needed to be able to reproduce
+However, it will crash inmediadtely. This is because the plug-in messes up with `sys.stdout` and `sys.sterr` objects, needed to be able to reproduce
 a 'console' application. So, there is possibility to improve the Python Console plug-in to become an IPython Console plug-in working on the
 Python code of this plug-in and adapt the way it manages those two objects.
 
@@ -122,9 +122,10 @@ pydevd_pycharm.settrace('localhost', port=9000, stdoutToServer=True, stderrToSer
 
 If you try this two lines inside the plug-in Python Console you will end with the same problem than IPython, these two solutions rely on 
 `sys.stdout` and `sys.stderr`, but we are not giving up. So the main idea is to execute those two lines. So easy, let's hack into the plug-in
-files and put them. However, for the sake of the demo, let's use an even simplier plug-in, there is a bright new plug-ins templates for
+files and put them. However, for the sake of the demo, let's use an even simpler plug-in, there is a bright new plug-ins templates for
 several languages in a new location `Filters > Development > Goat Exercices > Excercise a goat and a python`. Which file is located (from 
-the sandbox point of view) at `/app/lib/gimp/2.99/extensions/org.gimp.extension.goat-exercises/goat-exercise-py3.py`
+the sandbox point of view) at `/app/lib/gimp/2.99/extensions/org.gimp.extension.goat-exercises/goat-exercise-py3.py` and from
+the host point of view (and the editable one) at `~/.local/share/flatpak/app/org.gimp.GIMP/lib/gimp/2.99/extensions/org.gimp.extension.goat-exercises/goat-exercise-py3.py`
 
 This plug-in is a simple 
 plug-in where the current loaded GIMP image (thus you need one opened), is color inverted. We are going to hook to our server using this plug-in.
@@ -174,8 +175,9 @@ $ cp plug-ins/pydev/goat-exercise-py3.py ~/.local/share/flatpak/app/org.gimp.GIM
 
 To enable it, just declare in GIMP plugin paths your path to `plug-ins` folder of this repo. The
 way to do so is in `Edit > Preferences > Folders > Scripts`. The reboot GIMP and look if there is a
-new item under `Filers > Development > Python > PyDev Client`. **Before**, launching the plug-in
-you should have started the PyDev server inside PyCharm. 
+new item under `Filers > Development > Python > PyDev Client`. Also notice you will need to install 
+the plugin dependencies in the Python environment GIMP is using, in my case the Sandbox one, _check previous
+sections of this readme_. **Before**, launching the plug-in you should have started the PyDev server inside PyCharm. 
 
 Then you can run Python code directly from PyCharm, happy hacking. 
 
@@ -184,6 +186,11 @@ Then you can run Python code directly from PyCharm, happy hacking.
 
 # TODO list
 
-- Fork Python Console plug-in to be able to run IPython.
-- ~~Create a minimal Python plug-in to create a PyDev client.~~ → First version available. 
-
+- ~~Create a minimal Python plug-in to create a PyDev client.~~ → First version available.
+- Fork Python Console plug-in to be able to run IPython. Only forked, for the moment states
+  the same functionality. 
+- Create a minimal Python package which depends on IPython and pydev, and other dev stuff, to install
+  it to be able to use the new plugins. 
+- Create a pip wrapper to show useful info like `pip list` and also install PyPI packages from GIMP 
+  to GIMP Python environment.
+- Define proper licence in the repo. 
