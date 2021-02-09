@@ -139,7 +139,7 @@ So the question to ask now is where the hell I put this call. Obviously you want
 main method is defined: 
 
 ```python
-    def run(self, procedure, run_mode, image, drawable, args, run_data):
+def run(self, procedure, run_mode, image, drawable, args, run_data):
 ```
 
 One can add the `set_trace()` call just there, however we will not know if it is actually running, and what is worse, we will freeze GIMP! So,
@@ -152,8 +152,8 @@ import multiprocessing as mp
 And just before the `while (True)` loop begins, we can add:
 
 ```python
-            th = mp.Process(target=set_trace)
-            th.start()
+th = mp.Process(target=set_trace)
+th.start()
 ```
 
 Before any return, this should be called `th.terminate()` to avoid another freeze. And it works! We are providing an isolated Python terminal
@@ -170,8 +170,20 @@ actual environment and not the Sandbox, so, assuming that you are in the repo's 
 $ cp plug-ins/pydev/goat-exercise-py3.py ~/.local/share/flatpak/app/org.gimp.GIMP/current/active/files/lib/gimp/2.99/extensions/org.gimp.extension.goat-exercises
 ```
 
+## Update: first version of PyDev plugin
+
+To enable it, just declare in GIMP plugin paths your path to `plug-ins` folder of this repo. The
+way to do so is in `Edit > Preferences > Folders > Scripts`. The reboot GIMP and look if there is a
+new item under `Filers > Development > Python > PyDev Client`. **Before**, launching the plug-in
+you should have started the PyDev server inside PyCharm. 
+
+Then you can run Python code directly from PyCharm, happy hacking. 
+
+![GIMP PyDev Demo](GIMP-PyDev-Demo-2.jpeg)
+
+
 # TODO list
 
 - Fork Python Console plug-in to be able to run IPython.
-- Create a minimal Python plug-in to create a PyDev client. 
+- ~~Create a minimal Python plug-in to create a PyDev client.~~ → First version available. 
 
