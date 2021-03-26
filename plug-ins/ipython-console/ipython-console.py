@@ -150,6 +150,7 @@ def run(procedure, args, data):
             if not proc_name:
                 return
 
+            # TODO fix this bug:
             proc = pdb[proc_name]
 
             cmd = ''
