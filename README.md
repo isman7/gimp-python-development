@@ -193,4 +193,4 @@ Then you can run Python code directly from PyCharm, happy hacking.
   it to be able to use the new plugins. 
 - Create a pip wrapper to show useful info like `pip list` and also install PyPI packages from GIMP 
   to GIMP Python environment.
-- Define proper licence in the repo. 
+- ~~Define proper licence in the repo.~~ → GNU GPL v3 added.
