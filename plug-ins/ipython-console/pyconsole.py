@@ -50,6 +50,9 @@ import sys
 import keyword
 import re
 
+
+def flush(): pass
+
 def pango_pixels(value):
     # The PANGO_PIXELS macro is not accessible through GObject
     # Introspection. Just reimplement it:
@@ -590,6 +593,8 @@ class _Console(_ReadLine, code.InteractiveInterpreter):
 
         saved_stdout, saved_stderr = sys.stdout, sys.stderr
         sys.stdout, sys.stderr = self._stdout, self._stderr
+        sys.stderr.flush = flush
+        sys.stdout.flush = flush
 
         if self.runsource(cmd):
             self.cmd_buffer = cmd

@@ -157,6 +157,8 @@ class PyDevClient(Gimp.PlugIn):
             scrolled.add(view)
             view.show()
 
+        set_trace()
+
         th = mp.Process(target=set_trace)
         th.start()
 
