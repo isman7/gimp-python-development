@@ -14,18 +14,15 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-gi.require_version('Gdk', '3.0')
-from gi.repository import Gdk
-from gi.repository import GObject
-from gi.repository import Pango
 import code
 import sys
 import keyword
 import re
+
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
 
 
 def flush(): pass

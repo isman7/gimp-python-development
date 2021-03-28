@@ -18,7 +18,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import sys
-import gettext
 import gi
 
 gi.require_version('Gimp', '3.0')
@@ -31,19 +30,15 @@ from gi.repository import Gio
 from gi.repository import GLib
 
 from gimp.plugins.console import ConsoleDialog
+from gimp.plugins.console.utils import translate_str_gimp
 
 
-PROC_NAME = 'ipython-console'
-
-RESPONSE_BROWSE, RESPONSE_CLEAR, RESPONSE_SAVE = range(3)
-
-_ = gettext.gettext
-def N_(message): return message
+PROC_NAME = 'console'
 
 
 def run(procedure, args, data):
-    GimpUi.init("ipython-console.py")
-    ConsoleDialog().run()
+    GimpUi.init("console.py")
+    ConsoleDialog(proc_name=PROC_NAME).run()
 
     return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
@@ -84,9 +79,9 @@ class PythonConsole(Gimp.PlugIn):
                 run,
                 None
             )
-            procedure.set_menu_label(N_("IPython _Console"))
+            procedure.set_menu_label(translate_str_gimp("Python Console"))
             procedure.set_documentation(
-                N_("Interactive GIMP Python interpreter"),
+                translate_str_gimp("Interactive GIMP Python interpreter"),
                 "Type in commands and see results",
                 ""
             )

@@ -1,5 +1,4 @@
 import sys
-import gettext
 
 import gi
 from gi.repository import Gimp
@@ -9,10 +8,10 @@ from gi.repository import GObject
 from gi.repository import Gio
 from gi.repository import GLib
 
-from . import pyconsole
+from .gtk import Console
+from .utils import translate_str, translate_str_gimp
 
 
-PROC_NAME = 'ipython-console'
 RESPONSE_BROWSE, RESPONSE_CLEAR, RESPONSE_SAVE = range(3)
 
 namespace = {
@@ -32,15 +31,11 @@ namespace = {
 }
 
 
-_ = gettext.gettext
-def N_(message): return message
-
-
-class GimpConsole(pyconsole.Console):
+class GimpConsole(Console):
     def __init__(self, quit_func=None):
         banner = f'GIMP {Gimp.version()} Python Console\nPython {sys.version}\n'
 
-        pyconsole.Console.__init__(
+        Console.__init__(
             self,
             locals=namespace,
             banner=banner,
@@ -48,26 +43,26 @@ class GimpConsole(pyconsole.Console):
         )
 
     def _commit(self):
-        pyconsole.Console._commit(self)
+        Console._commit(self)
         Gimp.displays_flush()
 
 
 class ConsoleDialog(GimpUi.Dialog):
-    def __init__(self):
+    def __init__(self, proc_name):
         use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
 
         GimpUi.Dialog.__init__(self, use_header_bar=use_header_bar)
 
-        self.set_property("help-id", PROC_NAME)
+        self.set_property("help-id", proc_name)
 
-        Gtk.Window.set_title(self, _("IPython Console"))
-        Gtk.Window.set_role(self, PROC_NAME)
+        Gtk.Window.set_title(self, translate_str("Python Console"))
+        Gtk.Window.set_role(self, proc_name)
         Gtk.Dialog.add_button(self, "_Save", Gtk.ResponseType.OK)
         Gtk.Dialog.add_button(self, "Cl_ear", RESPONSE_CLEAR)
-        Gtk.Dialog.add_button(self, _("_Browse..."), RESPONSE_BROWSE)
+        Gtk.Dialog.add_button(self, translate_str("_Browse..."), RESPONSE_BROWSE)
         Gtk.Dialog.add_button(self, "_Close", Gtk.ResponseType.CLOSE)
 
-        Gtk.Widget.set_name(self, PROC_NAME)
+        Gtk.Widget.set_name(self, proc_name)
         GimpUi.Dialog.set_alternative_button_order_from_array(
             self,
             [Gtk.ResponseType.CLOSE, RESPONSE_BROWSE, RESPONSE_CLEAR, Gtk.ResponseType.OK]
@@ -160,8 +155,8 @@ class ConsoleDialog(GimpUi.Dialog):
             use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
 
             dlg = GimpUi.ProcBrowserDialog(use_header_bar=use_header_bar)
-            Gtk.Window.set_title(dlg, _("Python Procedure Browser"))
-            Gtk.Window.set_role(dlg, PROC_NAME)
+            Gtk.Window.set_title(dlg, translate_str("Python Procedure Browser"))
+            Gtk.Window.set_role(dlg, dlg.get_selected())
             Gtk.Dialog.add_button(dlg, "Apply", Gtk.ResponseType.APPLY)
             Gtk.Dialog.add_button(dlg, "Close", Gtk.ResponseType.CLOSE)
 
@@ -191,7 +186,7 @@ class ConsoleDialog(GimpUi.Dialog):
                 logfile = open(filename, 'w')
 
             except IOError as e:
-                Gimp.message(_(f"Could not open '{filename}' for writing: {e.strerror}"))
+                Gimp.message(translate_str(f"Could not open '{filename}' for writing: {e.strerror}"))
                 return
 
             buffer = self.cons.buffer
@@ -206,7 +201,7 @@ class ConsoleDialog(GimpUi.Dialog):
                 logfile.close()
 
             except IOError as e:
-                Gimp.message(_(f"Could not write to '{filename}': {e.strerror}"))
+                Gimp.message(translate_str(f"Could not write to '{filename}': {e.strerror}"))
                 return
 
         Gtk.Widget.hide(dlg)
@@ -217,7 +212,7 @@ class ConsoleDialog(GimpUi.Dialog):
         if not self.save_dlg:
             dlg = Gtk.FileChooserDialog()
 
-            Gtk.Window.set_title(dlg, _("Save Python-Fu Console Output"))
+            Gtk.Window.set_title(dlg, translate_str("Save Python-Fu Console Output"))
             Gtk.Window.set_transient_for(dlg, self)
             Gtk.Dialog.add_button(dlg, "_Cancel", Gtk.ResponseType.CANCEL)
             Gtk.Dialog.add_button(dlg, "_Save", Gtk.ResponseType.OK)
