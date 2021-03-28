@@ -749,7 +749,12 @@ ReadLine = get_read_line_type()
 Console = get_console_type()
 
 
-def _make_window():
+def run():
+    start_script = """import gi
+gi.require_version('Gimp', '3.0')
+from gi.repository import Gimp
+"""
+
     window = Gtk.Window()
     window.set_title("pyconsole.py")
     swin = Gtk.ScrolledWindow()
@@ -758,23 +763,22 @@ def _make_window():
     console = Console(
         banner="Hello there!",
         use_rlcompleter=False,
-        start_script="gi.require_version('Gimp', '3.0')\nfrom gi.repository import Gimp\n"
+        start_script=start_script
     )
     swin.add(console)
 
     width, height = console.get_default_size()
-    sb_width, sb_height = swin.get_vscrollbar().size_request()
+    # sb_width, sb_height = swin.get_vscrollbar().size_request()
 
-    window.set_default_size(width + sb_width, height)
+    window.set_default_size(width, height)
     window.show_all()
 
     if not Gtk.main_level():
         window.connect("destroy", Gtk.main_quit)
-        Gtk.main()
+    Gtk.main()
 
     return console
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2 or sys.argv[1] != '-gimp':
-        _make_window()
+    run()

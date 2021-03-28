@@ -22,9 +22,9 @@ class GtkInterpreter(InteractiveInterpreter):
 
     def runcode(self, cmd):
         sys.stdout = self.stdout
-        sys.stdout.flush = flush
+        # sys.stdout.flush = flush
         sys.stderr = self.stderr
-        sys.stderr.flush = flush
+        # sys.stderr.flush = flush
         result = InteractiveInterpreter.runcode(self, cmd)
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
@@ -399,7 +399,7 @@ class GtkPyInterpreterWidget(Gtk.VBox):
                 # up
                 cmd = self._history.up()
 
-                if cmd != None:
+                if cmd is not None:
                     start_iter = textbuffer.get_iter_at_mark(self._input_mark)
                     end_iter = textbuffer.get_end_iter()
                     textbuffer.delete(start_iter, end_iter)
@@ -471,7 +471,7 @@ class GtkPyInterpreterWidget(Gtk.VBox):
                 self._prev_key = event.keyval
 
                 # display suggestion
-                if suggest != None:
+                if suggest is not None:
                     start_iter = textbuffer.get_iter_at_mark(self._input_mark)
                     end_iter = textbuffer.get_end_iter()
                     textbuffer.delete(start_iter, end_iter)
@@ -494,7 +494,7 @@ class GtkPyInterpreterWidget(Gtk.VBox):
                 self._prev_key = event.keyval
 
                 # display suggestion
-                if suggest != None:
+                if suggest is not None:
                     start_iter = textbuffer.get_iter_at_mark(self._input_mark)
                     end_iter = textbuffer.get_end_iter()
                     textbuffer.delete(start_iter, end_iter)
@@ -631,7 +631,7 @@ class GtkPyInterpreterWidget(Gtk.VBox):
         return self._history
 
 
-if __name__ == '__main__':
+def run():
     w = Gtk.Window()
     w.set_title('Gtk3 Interactive Python Interpreter')
     w.set_default_size(800, 600)
@@ -641,3 +641,7 @@ if __name__ == '__main__':
     w.add(c)
     w.show_all()
     Gtk.main()
+
+
+if __name__ == '__main__':
+    run()

@@ -32,13 +32,34 @@ from gi.repository import GLib
 from gimp.plugins.console import ConsoleDialog
 from gimp.plugins.console.utils import translate_str_gimp
 
+from gimp.plugins.console.gtk.pyconsole import run as run_pyconsole
+from gimp.plugins.console.gtk.gtkpyinterpreter import run as run_pyinterpreter
+from gimp.plugins.console.gtk.gtkmatplotlibshell import run as run_matplotlibshell
+
 
 PROC_NAME = 'console'
 
 
+def run_gimp_console():
+    """Run the official GIMP pyconsole"""
+    return ConsoleDialog(proc_name=PROC_NAME).run()
+
+
+run_funcs = dict(
+    gimp=run_gimp_console,
+    pyconsole=run_pyconsole,
+    pyinterpreter=run_pyinterpreter,
+    matplotlibshell=run_matplotlibshell
+)
+
+RUN = "gimp"
+
+
 def run(procedure, args, data):
     GimpUi.init("console.py")
-    ConsoleDialog(proc_name=PROC_NAME).run()
+
+    run_f = run_funcs[RUN]
+    run_f()
 
     return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 

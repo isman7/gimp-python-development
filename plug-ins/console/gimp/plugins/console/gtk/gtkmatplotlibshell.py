@@ -1,12 +1,14 @@
-import hashlib
-import matplotlib
-
-matplotlib.use('Gtk3Agg')
-import matplotlib.pylab
+import tempfile
 import time
+
+from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 
-from gtkpyinterpreter import GtkPyInterpreterWidget
+import matplotlib
+matplotlib.use('Gtk3Agg')
+import matplotlib.pylab
+
+from .gtkpyinterpreter import GtkPyInterpreterWidget
 
 
 class GtkMatplotlibShellWidget(GtkPyInterpreterWidget):
@@ -44,9 +46,9 @@ class GtkMatplotlibShellWidget(GtkPyInterpreterWidget):
 
     def _pylab_show(self):
         fig = matplotlib.pylab.gcf()
-        temp_fn = '/tmp/' + hashlib.md5(str(time.time())).hexdigest() + '.png'
-        fig.savefig(temp_fn, figsize=self._figsize, dpi=self._dpi)
-        self.gtk_stdout.write_image(temp_fn)
+        temp_fn = tempfile.NamedTemporaryFile(suffix=".png")
+        fig.savefig(temp_fn, dpi=self._dpi)
+        self.gtk_stdout.write_image(temp_fn.name)
 
     def _pylab_plot(self, *args, **kwargs):
         matplotlib.pylab.plot(*args, **kwargs)
@@ -109,9 +111,7 @@ class GtkMatplotlibShellWidget(GtkPyInterpreterWidget):
         if self._auto_plot: self._pylab_show()
 
 
-if __name__ == '__main__':
-    from gi.repository import Gtk
-
+def run():
     w = Gtk.Window()
     w.set_title('Gtk3 Matplotlib shell')
     w.set_default_size(800, 600)
@@ -121,3 +121,7 @@ if __name__ == '__main__':
     w.add(c)
     w.show_all()
     Gtk.main()
+
+
+if __name__ == '__main__':
+    run()
