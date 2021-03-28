@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
-#   Gimp-Python - allows the writing of Gimp plugins in Python.
-#   Copyright (C) 1997  James Henstridge <james@daa.com.au>
+#
+#   This package is part of:
+#   gimp-python-development tools
+#   Copyright (C) 2021  Ismael Benito <ismaelbenito@protonmail.com>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,15 +31,15 @@ from gi.repository import GLib
 
 import sys
 import pyconsole
-#import gimpshelf, gimpui, pyconsole
 
 import gettext
+
+
 _ = gettext.gettext
 def N_(message): return message
 
 
 PROC_NAME = 'ipython-console'
-
 
 RESPONSE_BROWSE, RESPONSE_CLEAR, RESPONSE_SAVE = range(3)
 
@@ -45,27 +47,32 @@ RESPONSE_BROWSE, RESPONSE_CLEAR, RESPONSE_SAVE = range(3)
 def run(procedure, args, data):
     GimpUi.init("ipython-console.py")
 
-    namespace = {'__builtins__': __builtins__,
-                 '__name__': '__main__', '__doc__': None,
-                 'Babl': gi.repository.Babl,
-                 'cairo': gi.repository.cairo,
-                 'Gdk': gi.repository.Gdk,
-                 'Gegl': gi.repository.Gegl,
-                 'Gimp': gi.repository.Gimp,
-                 'Gio': gi.repository.Gio,
-                 'Gtk': gi.repository.Gtk,
-                 'GdkPixbuf': gi.repository.GdkPixbuf,
-                 'GLib': gi.repository.GLib,
-                 'GObject': gi.repository.GObject,
-                 'Pango': gi.repository.Pango }
+    namespace = {
+        '__builtins__': __builtins__,
+        '__name__': '__main__', '__doc__': None,
+        'Babl': gi.repository.Babl,
+        'cairo': gi.repository.cairo,
+        'Gdk': gi.repository.Gdk,
+        'Gegl': gi.repository.Gegl,
+        'Gimp': gi.repository.Gimp,
+        'Gio': gi.repository.Gio,
+        'Gtk': gi.repository.Gtk,
+        'GdkPixbuf': gi.repository.GdkPixbuf,
+        'GLib': gi.repository.GLib,
+        'GObject': gi.repository.GObject,
+        'Pango': gi.repository.Pango
+    }
 
     class GimpConsole(pyconsole.Console):
         def __init__(self, quit_func=None):
-            banner = ('GIMP %s Python Console\nPython %s\n' %
-                      (Gimp.version(), sys.version))
-            pyconsole.Console.__init__(self,
-                                       locals=namespace, banner=banner,
-                                       quit_func=quit_func)
+            banner = f'GIMP {Gimp.version()} Python Console\nPython {sys.version}\n'
+
+            pyconsole.Console.__init__(
+                self,
+                locals=namespace,
+                banner=banner,
+                quit_func=quit_func
+            )
 
         def _commit(self):
             pyconsole.Console._commit(self)
@@ -74,8 +81,11 @@ def run(procedure, args, data):
     class ConsoleDialog(GimpUi.Dialog):
         def __init__(self):
             use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
+
             GimpUi.Dialog.__init__(self, use_header_bar=use_header_bar)
+
             self.set_property("help-id", PROC_NAME)
+
             Gtk.Window.set_title(self, _("IPython Console"))
             Gtk.Window.set_role(self, PROC_NAME)
             Gtk.Dialog.add_button(self, "_Save", Gtk.ResponseType.OK)
@@ -84,15 +94,14 @@ def run(procedure, args, data):
             Gtk.Dialog.add_button(self, "_Close", Gtk.ResponseType.CLOSE)
 
             Gtk.Widget.set_name(self, PROC_NAME)
-            GimpUi.Dialog.set_alternative_button_order_from_array(self,
-                                                                [ Gtk.ResponseType.CLOSE,
-                                                                  RESPONSE_BROWSE,
-                                                                  RESPONSE_CLEAR,
-                                                                  Gtk.ResponseType.OK ])
+            GimpUi.Dialog.set_alternative_button_order_from_array(
+                self,
+                [Gtk.ResponseType.CLOSE, RESPONSE_BROWSE, RESPONSE_CLEAR, Gtk.ResponseType.OK]
+            )
 
             self.cons = GimpConsole(quit_func=lambda: Gtk.main_quit())
 
-            self.style_set (None, None)
+            self.style_set(None, None)
 
             self.connect('response', self.response)
             self.connect('style-set', self.style_set)
@@ -113,7 +122,7 @@ def run(procedure, args, data):
 
             width, height = self.cons.get_default_size()
             minreq, requisition = Gtk.Widget.get_preferred_size(scrl_win.get_vscrollbar())
-            sb_width  = requisition.width
+            sb_width = requisition.width
             sb_height = requisition.height
 
             # Account for scrollbar width and border width to ensure
@@ -123,9 +132,6 @@ def run(procedure, args, data):
 
         def style_set(self, old_style, user_data):
             pass
-            #style = Gtk.Widget.get_style (self)
-            #self.cons.stdout_tag.set_property ("foreground", style.text[Gtk.StateType.NORMAL])
-            #self.cons.stderr_tag.set_property ("foreground", style.text[Gtk.StateType.INSENSITIVE])
 
         def response(self, dialog, response_id):
             if response_id == RESPONSE_BROWSE:
@@ -150,24 +156,22 @@ def run(procedure, args, data):
             if not proc_name:
                 return
 
-            # TODO fix this bug:
+            # TODO fix this bug, there is no pdb object in py3 gi API
             proc = pdb[proc_name]
 
             cmd = ''
 
             if len(proc.return_vals) > 0:
-                cmd = ', '.join(x[1].replace('-', '_')
-                                for x in proc.return_vals) + ' = '
+                cmd = ', '.join(x[1].replace('-', '_') for x in proc.return_vals) + ' = '
 
-            cmd = cmd + 'pdb.%s' % proc.proc_name.replace('-', '_')
+            cmd = cmd + f"pdb.{proc.proc_name.replace('-', '_')}"
 
             if len(proc.params) > 0 and proc.params[0][1] == 'run-mode':
                 params = proc.params[1:]
             else:
                 params = proc.params
 
-            cmd = cmd + '(%s)' % ', '.join(x[1].replace('-', '_')
-                                           for x in params)
+            cmd = cmd + f"({', '.join(x[1].replace('-', '_') for x in params)})"
 
             buffer = self.cons.buffer
 
@@ -180,6 +184,7 @@ def run(procedure, args, data):
         def browse(self):
             if not self.browse_dlg:
                 use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
+
                 dlg = GimpUi.ProcBrowserDialog(use_header_bar=use_header_bar)
                 Gtk.Window.set_title(dlg, _("Python Procedure Browser"))
                 Gtk.Window.set_role(dlg, PROC_NAME)
@@ -187,13 +192,14 @@ def run(procedure, args, data):
                 Gtk.Dialog.add_button(dlg, "Close", Gtk.ResponseType.CLOSE)
 
                 Gtk.Dialog.set_default_response(self, Gtk.ResponseType.OK)
-                GimpUi.Dialog.set_alternative_button_order_from_array(dlg,
-                                                                    [ Gtk.ResponseType.CLOSE,
-                                                                      Gtk.ResponseType.APPLY ])
+
+                GimpUi.Dialog.set_alternative_button_order_from_array(
+                    dlg,
+                    [Gtk.ResponseType.CLOSE, Gtk.ResponseType.APPLY]
+                )
 
                 dlg.connect('response', self.browse_response)
-                dlg.connect('row-activated',
-                            lambda dlg: dlg.response(Gtk.ResponseType.APPLY))
+                dlg.connect('row-activated', lambda dlg: dlg.response(Gtk.ResponseType.APPLY))
 
                 self.browse_dlg = dlg
 
@@ -203,14 +209,15 @@ def run(procedure, args, data):
             if response_id == Gtk.ResponseType.DELETE_EVENT:
                 self.save_dlg = None
                 return
+
             elif response_id == Gtk.ResponseType.OK:
                 filename = dlg.get_filename()
 
                 try:
                     logfile = open(filename, 'w')
+
                 except IOError as e:
-                    Gimp.message(_("Could not open '%s' for writing: %s") %
-                                 (filename, e.strerror))
+                    Gimp.message(_(f"Could not open '{filename}' for writing: {e.strerror}"))
                     return
 
                 buffer = self.cons.buffer
@@ -223,24 +230,29 @@ def run(procedure, args, data):
                 try:
                     logfile.write(log)
                     logfile.close()
+
                 except IOError as e:
-                    Gimp.message(_("Could not write to '%s': %s") %
-                                 (filename, e.strerror))
+                    Gimp.message(_(f"Could not write to '{filename}': {e.strerror}"))
                     return
 
             Gtk.Widget.hide(dlg)
 
         def save_dialog(self):
+            # TODO fix this, it's not working, got:
+            # TypeError: argument self: Expected GimpUi.Dialog, but got gi.overrides.Gtk.FileChooserDialog
             if not self.save_dlg:
                 dlg = Gtk.FileChooserDialog()
+
                 Gtk.Window.set_title(dlg, _("Save Python-Fu Console Output"))
                 Gtk.Window.set_transient_for(dlg, self)
                 Gtk.Dialog.add_button(dlg, "_Cancel", Gtk.ResponseType.CANCEL)
                 Gtk.Dialog.add_button(dlg, "_Save", Gtk.ResponseType.OK)
                 Gtk.Dialog.set_default_response(self, Gtk.ResponseType.OK)
-                GimpUi.Dialog.set_alternative_button_order_from_array(dlg,
-                                                                    [ Gtk.ResponseType.OK,
-                                                                      Gtk.ResponseType.CANCEL ])
+
+                GimpUi.Dialog.set_alternative_button_order_from_array(
+                    dlg,
+                    [Gtk.ResponseType.OK, Gtk.ResponseType.CANCEL]
+                )
 
                 dlg.connect('response', self.save_response)
 
@@ -249,18 +261,7 @@ def run(procedure, args, data):
             self.save_dlg.present()
 
         def run(self):
-            from gtkpyinterpreter.gtkpyinterpreter import GtkPyInterpreterWidget
-            w = Gtk.Window()
-            w.set_title('Gtk3 Interactive Python Interpreter')
-            w.set_default_size(800, 600)
-            w.connect('destroy', Gtk.main_quit)
-            c = GtkPyInterpreterWidget({'window': w}, '/tmp/pyrc')
-            c.set_font('LiberationMono 10')
-            w.add(c)
-            w.show_all()
-            # Gtk.main()
-
-            # Gtk.Widget.show_all(self)
+            Gtk.Widget.show_all(self)
             Gtk.main()
 
     ConsoleDialog().run()
@@ -269,19 +270,24 @@ def run(procedure, args, data):
 
 
 class PythonConsole(Gimp.PlugIn):
-    ## Properties: parameters ##
-    @GObject.Property(type=Gimp.RunMode,
-                      default=Gimp.RunMode.NONINTERACTIVE,
-                      nick="Run mode", blurb="The run mode")
+    def __init__(self):
+        Gimp.PlugIn.__init__(self)
+        self._run_mode = None
+
+    @GObject.Property(
+        type=Gimp.RunMode,
+        default=Gimp.RunMode.NONINTERACTIVE,
+        nick="Run mode",
+        blurb="The run mode"
+    )
     def run_mode(self):
         """Read-write integer property."""
-        return self.runmode
+        return self._run_mode
 
     @run_mode.setter
     def run_mode(self, runmode):
-        self.runmode = runmode
+        self._run_mode = runmode
 
-    ## GimpPlugIn virtual methods ##
     def do_query_procedures(self):
         # Localization
         self.set_translation_domain(
@@ -306,9 +312,9 @@ class PythonConsole(Gimp.PlugIn):
                 ""
             )
             procedure.set_attribution(
-                "James Henstridge",
-                "James Henstridge",
-                "1997-1999"
+                "Ismael Benito",
+                "Ismael Benito",
+                "2021"
             )
             procedure.add_argument_from_property(self, "run-mode")
             procedure.add_menu_path("<Image>/Filters/Development/Python")
