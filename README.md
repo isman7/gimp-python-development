@@ -188,7 +188,8 @@ Then you can run Python code directly from PyCharm, happy hacking.
 
 - ~~Create a minimal Python plug-in to create a PyDev client.~~ → First version available.
 - Fork Python Console plug-in to be able to run IPython. Only forked, for the moment states
-  the same functionality. 
+  the same functionality. Update: now 4 consoles are working, some of them are more responsive,
+  but no IPython for the moment. 
 - Create a minimal Python package which depends on IPython and pydev, and other dev stuff, to install
   it to be able to use the new plugins. 
 - Create a pip wrapper to show useful info like `pip list` and also install PyPI packages from GIMP 
