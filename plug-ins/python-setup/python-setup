@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#    This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import gi
+
+gi.require_version('Gimp', '3.0')
+from gi.repository import Gimp
+
+gi.require_version('GimpUi', '3.0')
+from gi.repository import GimpUi
+
+gi.require_version('Gegl', '0.4')
+from gi.repository import Gegl
+from gi.repository import GObject
+from gi.repository import GLib
+from gi.repository import Gio
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk
+
+gi.require_version("WebKit2", "4.0")
+from gi.repository import WebKit2 as WebKit
+
+import os
+import sys
+import subprocess
+from pathlib import Path
+
+
+requirements = """
+markdown
+gimp-pydev-pycharm~=0.2.0
+gimp-console~=0.2.0
+"""
+
+HEAD_TEXT = "This plug-in ensures pip is installed in the GIMP Python."
+
+STEP_MD_TMP = """
+#### ({}/{}) {}:
+
+```
+{}
+
+{}
+
+```
+
+"""
+
+LAST_MD_TMP = """
+#### ({}/{}) Register plug-ings paths:
+
+To finish the install, please ensure this path is placed in `"Preferences > Folders > Plug-ins"`:
+
+```
+{}/gimp/plugins
+```
+
+**Now, REBOOT GIMP and happy hacking!**
+"""
+
+
+class PyDevClient(Gimp.PlugIn):
+    ## Properties: parameters ##
+    @GObject.Property(type=Gimp.RunMode,
+                      default=Gimp.RunMode.NONINTERACTIVE,
+                      nick="Run mode", blurb="The run mode")
+    def run_mode(self):
+        """Read-write integer property."""
+        return self.runmode
+
+    @run_mode.setter
+    def run_mode(self, runmode):
+        self.runmode = runmode
+
+    def do_query_procedures(self):
+        return ["python-setup"]
+
+    def do_create_procedure(self, name):
+        procedure = Gimp.Procedure.new(
+            self,
+            name,
+            Gimp.PDBProcType.PLUGIN,
+            self.run, None
+        )
+
+        # procedure.set_image_types("*")
+
+        procedure.set_menu_label("Python Setup")
+        # procedure.set_icon_name(GimpUi.ICON_GEGL)
+        procedure.add_menu_path('<Image>/Python/Tools')
+
+        procedure.set_documentation(
+            "Launch a Python Setup tool",
+            "Launch a Python Setup tool",
+            name
+        )
+        procedure.set_attribution("Ismael Benito", "Ismael Benito", "2021")
+
+        procedure.add_argument_from_property(self, "run-mode")
+
+        return procedure
+
+    def run(self, procedure, args, run_data):
+
+        GimpUi.init("python-setup")
+
+        dialog = GimpUi.Dialog(
+            use_header_bar=True,
+            title="Python Setup",
+            role="python-setup"
+        )
+
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("Source", Gtk.ResponseType.APPLY)
+        dialog.add_button("OK", Gtk.ResponseType.OK)
+
+        dialog.set_default_size(720, 480)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        dialog.get_content_area().add(box)
+        box.show()
+
+        label = Gtk.Label(label=HEAD_TEXT)
+        box.pack_start(label, False, False, 1)
+        label.show()
+
+        python = sys.executable
+
+        p = subprocess.run(
+            [f'{python} -m ensurepip'],
+            stdout=subprocess.PIPE,
+            shell=True
+        )
+
+        p_output = STEP_MD_TMP.format(
+            1, 4, "Ensure pip",
+            p.stdout.decode() if p.stdout is not None else '',
+            p.stderr.decode() if p.stderr is not None else ''
+        )
+
+        p2 = subprocess.run(
+            [f'{python} -m pip install -U pip'],
+            stdout=subprocess.PIPE,
+            shell=True
+        )
+
+        p2_output = STEP_MD_TMP.format(
+            2, 4, "Install PyDev Debugger and dependencies and complements",
+            p2.stdout.decode() if p2.stdout is not None else '',
+            p2.stderr.decode() if p2.stderr is not None else ''
+        )
+
+        requirements_list = " ".join(requirements.split("\n"))
+
+        p3 = subprocess.run(
+            [f'{python} -m pip install {requirements_list}'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True
+        )
+
+        p3_output = STEP_MD_TMP.format(
+            3, 4, "Register plug-ins paths",
+            p3.stdout.decode() if p3.stdout is not None else '',
+            p3.stderr.decode() if p3.stderr is not None else ''
+        )
+
+        site_packages = [Path(p) for p in sys.path if "site-packages" in p]
+        site_packages = [p for p in site_packages if p.stem == "site-packages" and os.access(p, os.W_OK)]
+
+        site_packages = site_packages[0]
+
+        p4_output = LAST_MD_TMP.format(4, 4, site_packages)
+
+        contents = p_output + p2_output + p3_output + p4_output
+
+        if contents is not None:
+            # import here when we have ensured requirements are installed.
+            import markdown
+
+            scrolled = Gtk.ScrolledWindow()
+            scrolled.set_vexpand(True)
+            box.pack_start(scrolled, True, True, 1)
+            scrolled.show()
+
+            webview = WebKit.WebView()
+            webview.load_html(markdown.markdown(contents, extensions=['fenced_code']), None)
+            scrolled.add(webview)
+            webview.show()
+
+        while True:
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                dialog.destroy()
+                break
+            elif response == Gtk.ResponseType.APPLY:
+                url = "https://github.com/isman7/gimp-python-development"
+                Gio.app_info_launch_default_for_uri(url, None)
+                continue
+            else:
+                dialog.destroy()
+                return procedure.new_return_values(
+                    Gimp.PDBStatusType.CANCEL,
+                    GLib.Error()
+                )
+
+        # th.terminate()
+
+        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+
+
+Gimp.main(PyDevClient.__gtype__, sys.argv)

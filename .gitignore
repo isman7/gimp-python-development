@@ -1,6 +1,2 @@
-__pycache__/
-
-.idea/ 
-
-*.html
-
+.idea/
+.python-version

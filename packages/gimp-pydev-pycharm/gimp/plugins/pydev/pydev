@@ -101,7 +101,7 @@ class PyDevClient(Gimp.PlugIn):
 
         procedure.set_menu_label(N_("Run PyDev client"))
         # procedure.set_icon_name(GimpUi.ICON_GEGL)
-        procedure.add_menu_path('<Image>/Filters/Development/Python/')
+        procedure.add_menu_path('<Image>/Python/Tools')
 
         procedure.set_documentation(
             N_("Run a PyDev client"),
