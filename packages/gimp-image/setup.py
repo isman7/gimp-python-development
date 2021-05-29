@@ -7,7 +7,7 @@ readme = Path("README.md").read_text()
 
 setup(
     name='gimp-image',
-    version='0.0.0',
+    version='0.1.0',
     packages=find_packages(),
     url='https://github.com/isman7/gimp-python-development/',
     license='GNU GPLv3',
