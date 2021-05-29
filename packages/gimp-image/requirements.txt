@@ -1,2 +1,5 @@
 PyGObject
-pydevd-pycharm
+numpy
+scipy
+Pillow
+imageio
