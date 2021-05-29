@@ -1,0 +1,3 @@
+include requirements.txt
+include README.md
+# include gimp/plugins/pydev-client/pydev-client
