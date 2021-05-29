@@ -67,8 +67,8 @@ If you want to set up a development environment for Python plugins you will need
 with the output of the steps executed to install the environment.
 4. Remember to add your site-packages plug-in folder to `Preferences > Folders > Plug-ins`.
 
-![GIMP Python Setup 0](install-demo-0.png)
-![GIMP Python Setup 1](install-demo-1.png)
+![GIMP Python Setup 0](images/install-demo-0.png)
+![GIMP Python Setup 1](images/install-demo-1.png)
 
 
 # TODO list
