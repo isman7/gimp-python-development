@@ -1,7 +1,7 @@
 # A PyDev debugger client inside GIMP
 
 
-![GIMP PyDev Demo](https://github.com/isman7/gimp-python-development/raw/master/GIMP-PyDev-Demo-2.jpeg)
+![GIMP PyDev Demo](https://raw.githubusercontent.com/isman7/gimp-python-development/master/packages/gimp-pydev-pycharm/GIMP-PyDev-Demo.jpeg)
 
 
 # Old README.md
@@ -69,7 +69,7 @@ th.start()
 Before any return, this should be called `th.terminate()` to avoid another freeze. And it works! We are providing an isolated Python terminal
 to the debugger, which is running inside GIMP process, so it has access to GIMP bindings. My case: 
 
-![GIMP PyDev Demo](https://github.com/isman7/gimp-python-development/raw/master/GIMP-PyDev-Demo.jpeg)
+![GIMP PyDev Demo](https://raw.githubusercontent.com/isman7/gimp-python-development/master/packages/gimp-pydev-pycharm/GIMP-PyDev-Demo.jpeg)
 
 ## Modify the file
 
@@ -90,4 +90,4 @@ sections of this readme_. **Before**, launching the plug-in you should have star
 
 Then you can run Python code directly from PyCharm, happy hacking. 
 
-![GIMP PyDev Demo](https://github.com/isman7/gimp-python-development/raw/master/GIMP-PyDev-Demo-2.jpeg)
+![GIMP PyDev Demo](https://raw.githubusercontent.com/isman7/gimp-python-development/master/packages/gimp-pydev-pycharm/GIMP-PyDev-Demo-2.jpeg)
