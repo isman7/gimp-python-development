@@ -32,7 +32,7 @@ def numpy_image_to_gimp_layer(
         layer_name,
         gimp_image.width(),
         gimp_image.height(),
-        gimp_image.get_active_layer().type(),
+        Gimp.ImageBaseType.RGB,
         100,
         Gimp.LayerMode.NORMAL
     )
@@ -47,3 +47,20 @@ def numpy_image_to_gimp_layer(
 
     return layer
 
+
+def numpy_image_to_gimp_image(image: np.ndarray) -> Gimp.Image:
+    height, width, channels = image.shape
+
+    gimp_image = Gimp.Image.new(width, height, Gimp.ImageBaseType.RGB)
+    layer = numpy_image_to_gimp_layer(image, gimp_image, "Layer 1")
+
+    gimp_image.insert_layer(layer, layer.get_parent(), 0)
+
+    return gimp_image
+
+
+def display_image(image: np.ndarray) -> Gimp.Image:
+    gimp_image = numpy_image_to_gimp_image(image)
+    Gimp.Display.new(gimp_image)
+
+    return gimp_image
