@@ -43,8 +43,9 @@ from pathlib import Path
 
 
 requirements = """
-gimp-pydev-pycharm~=0.2.0
 markdown
+gimp-pydev-pycharm~=0.2.0
+gimp-console~=0.2.0
 """
 
 HEAD_TEXT = "This plug-in ensures pip is installed in the GIMP Python."
@@ -165,10 +166,10 @@ class PyDevClient(Gimp.PlugIn):
             p2.stderr.decode() if p2.stderr is not None else ''
         )
 
-        req = Path(__file__).parent / "requirements.txt"
+        requirements_list = " ".join(requirements.split("\n"))
 
         p3 = subprocess.run(
-            [f'{python} -m pip install -r {req.absolute()}'],
+            [f'{python} -m pip install {requirements_list}'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True
