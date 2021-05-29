@@ -190,8 +190,8 @@ Then you can run Python code directly from PyCharm, happy hacking.
 - Fork Python Console plug-in to be able to run IPython. Only forked, for the moment states
   the same functionality. Update: now 4 consoles are working, some of them are more responsive,
   but no IPython for the moment. 
-- Create a minimal Python package which depends on IPython and pydev, and other dev stuff, to install
-  it to be able to use the new plugins. 
+- ~~Create a minimal Python package which depends on IPython and pydev, and other dev stuff, to install
+  it to be able to use the new plugins.~~ 
 - Create a pip wrapper to show useful info like `pip list` and also install PyPI packages from GIMP 
   to GIMP Python environment.
 - ~~Define proper licence in the repo.~~ → GNU GPL v3 added.

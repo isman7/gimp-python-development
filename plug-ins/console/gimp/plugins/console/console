@@ -112,7 +112,7 @@ class PythonConsole(Gimp.PlugIn):
                 "2021"
             )
             procedure.add_argument_from_property(self, "run-mode")
-            procedure.add_menu_path("<Image>/Filters/Development/Python")
+            procedure.add_menu_path("<Image>/Python/Tools")
 
             return procedure
         return None
